@@ -3,7 +3,7 @@ Our web project
 
 ## Install
 
-To install dependecies using requirements.txt run this command:
+To install dependecies, run this command:
 ```console
 (venv) pip install -r requirements.txt
 ```
