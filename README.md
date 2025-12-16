@@ -1,5 +1,5 @@
 # FORMULA ONE STATISTICS API
-A REST API which provides F1 statistics.
+REST API which provides F1 statistics.
 
 ## Running custom server instance
 
@@ -8,6 +8,11 @@ A REST API which provides F1 statistics.
 2. Install dependecies:
 ```console
 pip install -r requirements.txt
+```
+
+3. Run app:
+```console
+python app.py
 ```
 
 ## Acknowledgements
