@@ -1,9 +1,14 @@
-# WEB PROJECT
-Our web project
+# FORMULA ONE STATISTICS API
+A REST API which provides F1 statistics.
 
-## Install
+## Running custom server instance
 
-To install dependecies, run this command:
+1. Clone the github repository
+
+2. Install dependecies:
 ```console
-(venv) pip install -r requirements.txt
+pip install -r requirements.txt
 ```
+
+## Acknowledgements
+F1 data are from "Formula 1 World Championship (1950 - 2024)" compiled by Vopani on _kaggle.com_ (https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020)
