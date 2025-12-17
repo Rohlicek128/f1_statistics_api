@@ -1,0 +1,307 @@
+openapi: 3.1.0
+info:
+  title: F1 Statistics API
+  version: 1.0.0
+  description: |
+    API pro získávání statistik Formule 1.
+
+    ⚠️ Některé GET endpointy používají JSON body, což není podporováno webovými klienty (Fetch API, Swagger UI, PyCharm HTTP Client).  
+    Tyto endpointy lze volat pouze přes nástroje jako curl nebo Postman.
+
+servers:
+  - url: http://127.0.0.1:8088
+    description: Lokální server
+
+paths:
+  /api/v1/stats/drivers:
+    get:
+      summary: Získání informací o jezdci podle příjmení
+      description: |
+        Tento endpoint očekává JSON body s klíčem "surname".
+        ⚠️ Funguje pouze přes curl nebo Postman. Browserové klienty selžou.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - surname
+              properties:
+                surname:
+                  type: string
+                  example: Alonso
+      responses:
+        "200":
+          description: Informace o jezdci
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Driver'
+        "400":
+          description: Chybí klíč "surname"
+
+  /api/v1/stats/seasons:
+    get:
+      summary: Získání všech sezón
+      responses:
+        "200":
+          description: Seznam všech sezón
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: "2004"
+
+  /api/v1/stats/seasons/races:
+    get:
+      summary: Získání závodů pro danou sezónu
+      description: |
+        GET endpoint očekává JSON body s klíčem "season".
+        ⚠️ Funguje pouze přes curl/Postman.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - season
+              properties:
+                season:
+                  type: string
+                  example: "2004"
+      responses:
+        "200":
+          description: Seznam závodů v sezóně
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: Australian Grand Prix
+                    date:
+                      type: string
+                      format: date
+                      example: "2004-03-07"
+
+  /api/v1/stats/seasons/races/results:
+    get:
+      summary: Získání výsledků závodu
+      description: |
+        GET endpoint očekává JSON body s klíči "season" a "round".
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - season
+                - round
+              properties:
+                season:
+                  type: string
+                  example: "2004"
+                round:
+                  type: string
+                  example: "2"
+      responses:
+        "200":
+          description: Výsledky závodu
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    driver:
+                      type: string
+                      example: Michael_Schumacher
+                    constructor:
+                      type: string
+                      example: Ferrari
+                    grid:
+                      type: string
+                      example: "1"
+
+  /api/v1/stats/seasons/championships/drivers:
+    get:
+      summary: Body jezdců v mistrovství
+      description: |
+        GET endpoint očekává JSON body s klíči "season" a volitelně "round".
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - season
+              properties:
+                season:
+                  type: string
+                  example: "2006"
+                round:
+                  type: string
+                  example: "4"
+      responses:
+        "200":
+          description: Body jezdců
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    points:
+                      type: string
+                      example: "36"
+                    driver:
+                      type: string
+                      example: Alonso
+                    wins:
+                      type: string
+                      example: "2"
+
+  /api/v1/stats/seasons/championships/constructors:
+    get:
+      summary: Body konstruktérů v mistrovství
+      description: |
+        GET endpoint očekává JSON body s klíči "season" a volitelně "round".
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - season
+              properties:
+                season:
+                  type: string
+                  example: "2006"
+                round:
+                  type: string
+                  example: "4"
+      responses:
+        "200":
+          description: Body konstruktérů
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    points:
+                      type: string
+                      example: "51"
+                    driver:
+                      type: string
+                      example: Renault
+                    wins:
+                      type: string
+                      example: "3"
+
+  /api/v1/stats/seasons/races/active/hook:
+    post:
+      summary: Přidání webhooku pro aktivní závod
+      description: |
+        Přidá klienta pro zasílání webhooků s výsledky závodu.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - callbackUrl
+                - season
+                - round
+              properties:
+                callbackUrl:
+                  type: string
+                  format: uri
+                  example: "http://example.com/webhook"
+                season:
+                  type: string
+                  example: "2025"
+                round:
+                  type: string
+                  example: "3"
+      responses:
+        "200":
+          description: Webhook úspěšně přidán
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "400":
+          description: Chybějící požadovaná data
+
+  /dev/hooks:
+    post:
+      summary: Testovací endpoint pro webhooky
+      description: |
+        Slouží pro testování příchozích webhooků. Vrací vždy "Accepted".
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Webhook přijat
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Accepted
+
+components:
+  schemas:
+    Driver:
+      type: object
+      properties:
+        driverId:
+          type: string
+          example: "4"
+        driverRef:
+          type: string
+          example: alonso
+        number:
+          type: string
+          example: "14"
+        code:
+          type: string
+          example: ALO
+        forename:
+          type: string
+          example: Fernando
+        surname:
+          type: string
+          example: Alonso
+        dob:
+          type: string
+          format: date
+          example: "1981-07-29"
+        nationality:
+          type: string
+          example: Spanish
+        url:
+          type: string
+          example: http://en.wikipedia.org/wiki/Fernando_Alonso
