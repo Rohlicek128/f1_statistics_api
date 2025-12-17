@@ -64,7 +64,7 @@ class Statistics:
         return result
 
     def get_race(self, year: int, round: int) -> dict[str, str]:
-        print(f"{year} {round}")
+        #print(f"{year} {round}")
         for id, race in self.races.items():
             if int(race["year"]) == year and int(race["round"]) == round:
                 return race
@@ -99,10 +99,10 @@ class Statistics:
         results.sort()
         return results
 
-    def get_season_races(self, year: int):
+    def get_season_races(self, season: int):
         results = {}
         for id, race in self.races.items():
-            if int(race["year"]) != year:
+            if int(race["year"]) != season:
                 continue
             results[race["round"]] = {
                 "name": race["name"],
@@ -121,7 +121,7 @@ class Statistics:
         for id, d_standing in self.driver_standings.items():
             if d_standing["raceId"] != race_id:
                 continue
-            results[d_standing["position"]] = {
+            results["{:02}".format(int(d_standing["position"]))] = {
                 "points": d_standing["points"],
                 "driver": self.drivers[d_standing["driverId"]]["driverRef"].title(),
                 "wins": d_standing["wins"]
@@ -138,7 +138,7 @@ class Statistics:
         for id, c_standing in self.constructor_standings.items():
             if c_standing["raceId"] != race_id:
                 continue
-            results[c_standing["position"]] = {
+            results["{:02}".format(int(c_standing["position"]))] = {
                 "points": c_standing["points"],
                 "driver": self.constructors[c_standing["constructorId"]]["name"],
                 "wins": c_standing["wins"]

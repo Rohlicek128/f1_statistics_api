@@ -62,19 +62,55 @@ def stats_seasons_c_championship(season):
 
 
 # Webhooks
-@app.route('/api/v1/stats/seasons/races/active/hook', methods=['POST'])
-def stats_race_results_wh():
+@app.route('/api/v1/stats/seasons/<int:season>/races/<int:round>/webhooks', methods=['POST'])
+def stats_race_results_wh(season, round):
+    delayMs = request.args.get("delayMs", type=int)
+    if delayMs is None:
+        delayMs = 1000
+    if delayMs < 500 and delayMs != -1:
+        delayMs = 500
+
     data = request.get_json()
-    if "callbackUrl" not in data or "season" not in data or "round" not in data:
+    if "callbackUrl" not in data:
         abort(400)
-    webhookManager.add_client(data["callbackUrl"], season=int(data["season"]), round=int(data["round"]))
+    webhookManager.add_race_webhook(data["callbackUrl"], int(season), int(round), delayMs)
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
+@app.route('/api/v1/stats/seasons/<int:season>/championships/drivers/webhooks', methods=['POST'])
+def stats_drivers_standings_wh(season):
+    delayMs = request.args.get("delayMs", type=int)
+    if delayMs is None:
+        delayMs = 1000
+    if delayMs < 500:
+        delayMs = 500
+
+    data = request.get_json()
+    if "callbackUrl" not in data:
+        abort(400)
+    webhookManager.add_drivers_standings_webhook(data["callbackUrl"], int(season), delayMs)
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
+@app.route('/api/v1/stats/seasons/<int:season>/championships/constructors/webhooks', methods=['POST'])
+def stats_constructors_standings_wh(season):
+    delayMs = request.args.get("delayMs", type=int)
+    if delayMs is None:
+        delayMs = 1000
+    if delayMs < 500:
+        delayMs = 500
+
+    data = request.get_json()
+    if "callbackUrl" not in data:
+        abort(400)
+    webhookManager.add_constructors_standings_webhook(data["callbackUrl"], int(season), delayMs)
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
 
 @app.route('/dev/hooks', methods=['POST'])
 def dev_hooks():
     data = request.get_json()
     pprint(data)
     return "Accepted"
+
 
 
 if __name__ == "__main__":
