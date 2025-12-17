@@ -20,7 +20,7 @@ class Client:
         while str(lap) in laps:
             drivers = {}
             for id, drivers_laps in race_laps.items():
-                lap_position = "XX"
+                lap_position = f"XX{self.stats.drivers[id]['number']}"
                 lap_time = "N/A"
                 if str(lap) in drivers_laps:
                     lap_position = int(drivers_laps[str(lap)]["position"])

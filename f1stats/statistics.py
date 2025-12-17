@@ -59,7 +59,7 @@ class Statistics:
     def get_driver_by_surname(self, surname: str) -> list[dict[str, str]]:
         result = []
         for id, driver in self.drivers.items():
-            if driver["surname"] == surname:
+            if driver["surname"].lower() == surname.lower():
                 result.append(driver)
         return result
 
@@ -70,18 +70,26 @@ class Statistics:
                 return race
         raise ValueError("Race not found")
 
-    def get_race_results(self, year: int, round: int):
-        race_id = self.get_race(year, round)["raceId"]
+    def get_race_results(self, season: int, round: int):
+        try:
+            race_id = self.get_race(season, round)["raceId"]
+        except ValueError as err:
+            return { "error": str(err) }
 
         results = {}
+        drivers = {}
         for id, result in self.results.items():
             if result["raceId"] != race_id:
                 continue
-            results[result["position"]] = {
+            drivers[result["position"]] = {
                 "driver": self.drivers[result["driverId"]]["driverRef"].title(),
                 "constructor": self.constructors[result["constructorId"]]["name"],
                 "grid": result["grid"]
             }
+        results = {
+            "drivers": drivers,
+            "race": self.races[race_id]["name"]
+        }
         return results
 
     def get_seasons(self):
@@ -94,7 +102,7 @@ class Statistics:
     def get_season_races(self, year: int):
         results = {}
         for id, race in self.races.items():
-            if race["year"] != year:
+            if int(race["year"]) != year:
                 continue
             results[race["round"]] = {
                 "name": race["name"],
@@ -104,7 +112,10 @@ class Statistics:
 
 
     def get_d_championship_race_results(self, season: int, round: int):
-        race_id = self.get_race(season, round)["raceId"]
+        try:
+            race_id = self.get_race(season, round)["raceId"]
+        except ValueError as err:
+            return { "error": str(err) }
 
         results = {}
         for id, d_standing in self.driver_standings.items():
@@ -118,7 +129,10 @@ class Statistics:
         return results
 
     def get_c_championship_race_results(self, season: int, round: int):
-        race_id = self.get_race(season, round)["raceId"]
+        try:
+            race_id = self.get_race(season, round)["raceId"]
+        except ValueError as err:
+            return { "error": str(err) }
 
         results = {}
         for id, c_standing in self.constructor_standings.items():
