@@ -1,45 +1,44 @@
 openapi: 3.1.0
 info:
   title: F1 Statistics API
-  version: 1.1.0
+  version: 1.2.0
   description: |
-    REST API pro získávání statistik Formule 1.
-    API používá path parametry a query parametry v souladu s REST standardy.
+    REST API pro statistiky Formule 1 včetně webhooků.
+    API je navrženo v souladu s REST standardy
+    (path parametry, query parametry, žádné GET body).
 
 servers:
-  - url: http://127.0.0.1:8088
-    description: Lokální vývojový server
+  - url: http://172.20.10.7:8088
+    description: Lokální server
 
 paths:
+
   /api/v1/stats/drivers/{surname}:
     get:
-      summary: Získání informací o jezdci
+      summary: Informace o jezdci
       parameters:
         - name: surname
           in: path
           required: true
-          description: Příjmení jezdce
           schema:
             type: string
             example: Alonso
       responses:
         "200":
-          description: Informace o jezdci
+          description: Jezdec nalezen
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Driver'
-        "404":
-          description: Jezdec nenalezen
+                  $ref: "#/components/schemas/Driver"
 
   /api/v1/stats/seasons:
     get:
-      summary: Získání všech sezón
+      summary: Seznam sezón
       responses:
         "200":
-          description: Seznam sezón
+          description: OK
           content:
             application/json:
               schema:
@@ -50,28 +49,27 @@ paths:
 
   /api/v1/stats/seasons/{season}/races:
     get:
-      summary: Získání závodů v sezóně
+      summary: Závody v sezóně
       parameters:
         - name: season
           in: path
           required: true
-          description: Rok sezóny
           schema:
             type: integer
             example: 2004
       responses:
         "200":
-          description: Seznam závodů
+          description: OK
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  1: {$ref: '#/components/schemas/Race'}
+                  1: {$ref: "#/components/schemas/Race"}
 
   /api/v1/stats/seasons/{season}/races/{round}/results:
     get:
-      summary: Výsledky konkrétního závodu
+      summary: Výsledky závodu
       parameters:
         - name: season
           in: path
@@ -87,17 +85,17 @@ paths:
             example: 2
       responses:
         "200":
-          description: Výsledky závodu
+          description: OK
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  1: {$ref: '#/components/schemas/RaceResult'}
+                  1: {$ref: "#/components/schemas/RaceResult"}
 
   /api/v1/stats/seasons/{season}/championships/drivers:
     get:
-      summary: Průběžné pořadí jezdců
+      summary: Pořadí jezdců
       parameters:
         - name: season
           in: path
@@ -108,23 +106,22 @@ paths:
         - name: round
           in: query
           required: false
-          description: Kolo sezóny (pokud není zadáno, použije se poslední)
           schema:
             type: integer
             example: 4
       responses:
         "200":
-          description: Body jezdců
+          description: OK
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  1: {$ref: '#/components/schemas/DriverChampionship'}
+                  1: {$ref: "#/components/schemas/DriverChampionship"}
 
   /api/v1/stats/seasons/{season}/championships/constructors:
     get:
-      summary: Průběžné pořadí konstruktérů
+      summary: Pořadí konstruktérů
       parameters:
         - name: season
           in: path
@@ -135,40 +132,99 @@ paths:
         - name: round
           in: query
           required: false
-          description: Kolo sezóny (pokud není zadáno, použije se poslední)
           schema:
             type: integer
             example: 4
       responses:
         "200":
-          description: Body konstruktérů
+          description: OK
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  1: {$ref: '#/components/schemas/ConstructorChampionship'}
+                  1: {$ref: "#/components/schemas/ConstructorChampionship"}
 
-  /api/v1/stats/seasons/races/active/hook:
+  /api/v1/stats/seasons/{season}/races/{round}/webhooks:
     post:
-      summary: Registrace webhooku
+      summary: Webhook na výsledky závodu
+      parameters:
+        - name: season
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: round
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: delayMs
+          in: query
+          required: false
+          description: Interval zasílání dat (min. 500 ms, -1 = pouze jednou)
+          schema:
+            type: integer
+            example: 1000
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WebhookRequest'
+              $ref: "#/components/schemas/WebhookRequest"
       responses:
         "200":
-          description: Webhook úspěšně zaregistrován
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
+          description: Webhook zaregistrován
+
+  /api/v1/stats/seasons/{season}/championships/drivers/webhooks:
+    post:
+      summary: Webhook na pořadí jezdců
+      parameters:
+        - name: season
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: delayMs
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 1000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookRequest"
+      responses:
+        "200":
+          description: Webhook zaregistrován
+
+  /api/v1/stats/seasons/{season}/championships/constructors/webhooks:
+    post:
+      summary: Webhook na pořadí konstruktérů
+      parameters:
+        - name: season
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: delayMs
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 1000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookRequest"
+      responses:
+        "200":
+          description: Webhook zaregistrován
 
   /dev/hooks:
     post:
@@ -181,12 +237,7 @@ paths:
               type: object
       responses:
         "200":
-          description: Webhook přijat
-          content:
-            text/plain:
-              schema:
-                type: string
-                example: Accepted
+          description: Accepted
 
 components:
   schemas:
@@ -218,62 +269,45 @@ components:
       properties:
         name:
           type: string
-          example: Australian Grand Prix
         date:
           type: string
           format: date
-          example: "2004-03-07"
 
     RaceResult:
       type: object
       properties:
         driver:
           type: string
-          example: Alonso
         constructor:
           type: string
-          example: Renault
         grid:
           type: string
-          example: "1"
 
     DriverChampionship:
       type: object
       properties:
         driver:
           type: string
-          example: Alonso
         points:
           type: string
-          example: "36"
         wins:
           type: string
-          example: "2"
 
     ConstructorChampionship:
       type: object
       properties:
         driver:
           type: string
-          example: Renault
         points:
           type: string
-          example: "51"
         wins:
           type: string
-          example: "3"
 
     WebhookRequest:
       type: object
       required:
         - callbackUrl
-        - season
-        - round
       properties:
         callbackUrl:
           type: string
           format: uri
-        season:
-          type: integer
-        round:
-          type: integer
