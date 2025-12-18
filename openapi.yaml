@@ -66,8 +66,8 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties:
-                  $ref: '#/components/schemas/Race'
+                properties:
+                  1: {$ref: '#/components/schemas/Race'}
 
   /api/v1/stats/seasons/{season}/races/{round}/results:
     get:
@@ -92,8 +92,8 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties:
-                  $ref: '#/components/schemas/RaceResult'
+                properties:
+                  1: {$ref: '#/components/schemas/RaceResult'}
 
   /api/v1/stats/seasons/{season}/championships/drivers:
     get:
@@ -119,8 +119,8 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties:
-                  $ref: '#/components/schemas/DriverChampionship'
+                properties:
+                  1: {$ref: '#/components/schemas/DriverChampionship'}
 
   /api/v1/stats/seasons/{season}/championships/constructors:
     get:
@@ -146,8 +146,8 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties:
-                  $ref: '#/components/schemas/ConstructorChampionship'
+                properties:
+                  1: {$ref: '#/components/schemas/ConstructorChampionship'}
 
   /api/v1/stats/seasons/races/active/hook:
     post:
